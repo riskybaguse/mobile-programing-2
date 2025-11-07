@@ -4,9 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.activity.enableEdgeToEdge
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.riskybaguse.kalkulator.databinding.ActivityMainBinding
 import net.objecthunter.exp4j.ExpressionBuilder
 
@@ -26,14 +23,23 @@ class MainActivity : AppCompatActivity() {
         setContentView(view) // Menampilkan layout di layar
 
         // Tombol untuk mengaktifkan atau menonaktifkan mode gelap
-        binding.switchDarkMode.setOnClickListener {
-            if (binding.switchDarkMode.isChecked) {
-                // Jika tombol switch aktif, ubah tampilan ke mode gelap
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            } else {
-                // Jika tidak aktif, kembalikan ke mode terang
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
+        val sharedPref = getSharedPreferences("theme_pref", MODE_PRIVATE)
+        val isDarkMode = sharedPref.getBoolean("dark_mode", false)
+
+        // Set awal switch & mode
+        binding.switchDarkMode.isChecked = isDarkMode
+        AppCompatDelegate.setDefaultNightMode(
+            if (isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
+        )
+
+        // Event toggle switch
+        binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+            sharedPref.edit().putBoolean("dark_mode", isChecked).apply()
         }
 
         // Fungsi untuk menambahkan karakter (angka/operator) ke tampilan kalkulator
